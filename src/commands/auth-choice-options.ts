@@ -56,6 +56,12 @@ const AUTH_CHOICE_GROUP_DEFS: {
     choices: ["minimax-api", "minimax-api-lightning"],
   },
   {
+    value: "moonshot",
+    label: "Moonshot AI",
+    hint: "Kimi K2 + Kimi Coding",
+    choices: ["moonshot-api-key", "kimi-code-api-key"],
+  },
+  {
     value: "qwen",
     label: "Qwen",
     hint: "OAuth",
@@ -86,28 +92,16 @@ const AUTH_CHOICE_GROUP_DEFS: {
     choices: ["gemini-api-key", "google-antigravity", "google-gemini-cli"],
   },
   {
-    value: "copilot",
-    label: "Copilot",
-    hint: "GitHub + local proxy",
-    choices: ["github-copilot", "copilot-proxy"],
-  },
-  {
     value: "openrouter",
     label: "OpenRouter",
     hint: "API key",
     choices: ["openrouter-api-key"],
   },
   {
-    value: "ai-gateway",
-    label: "Vercel AI Gateway",
-    hint: "API key",
-    choices: ["ai-gateway-api-key"],
-  },
-  {
-    value: "moonshot",
-    label: "Moonshot AI",
-    hint: "Kimi K2 + Kimi Coding",
-    choices: ["moonshot-api-key", "kimi-code-api-key"],
+    value: "qwen",
+    label: "Qwen",
+    hint: "OAuth",
+    choices: ["qwen-portal"],
   },
   {
     value: "zai",
@@ -116,16 +110,40 @@ const AUTH_CHOICE_GROUP_DEFS: {
     choices: ["zai-api-key"],
   },
   {
-    value: "xiaomi",
-    label: "Xiaomi",
+    value: "copilot",
+    label: "Copilot",
+    hint: "GitHub + local proxy",
+    choices: ["github-copilot", "copilot-proxy"],
+  },
+  {
+    value: "ai-gateway",
+    label: "Vercel AI Gateway",
     hint: "API key",
-    choices: ["xiaomi-api-key"],
+    choices: ["ai-gateway-api-key"],
   },
   {
     value: "opencode-zen",
     label: "OpenCode Zen",
     hint: "API key",
     choices: ["opencode-zen"],
+  },
+  {
+    value: "xiaomi",
+    label: "Xiaomi",
+    hint: "API key",
+    choices: ["xiaomi-api-key"],
+  },
+  {
+    value: "synthetic",
+    label: "Synthetic",
+    hint: "Anthropic-compatible (multi-model)",
+    choices: ["synthetic-api-key"],
+  },
+  {
+    value: "venice",
+    label: "Venice AI",
+    hint: "Privacy-focused (uncensored models)",
+    choices: ["venice-api-key"],
   },
 ];
 
