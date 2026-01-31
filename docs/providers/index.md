@@ -39,7 +39,7 @@ See [Venice AI](/providers/venice).
 - [Redpill AI](/providers/redpill) - Privacy-focused inference with GPU TEE protection
 - [OpenRouter](/providers/openrouter)
 - [Vercel AI Gateway](/providers/vercel-ai-gateway)
-- [Moonshot AI (Kimi + Kimi Code)](/providers/moonshot)
+- [Moonshot AI (Kimi + Kimi Coding)](/providers/moonshot)
 - [OpenCode Zen](/providers/opencode)
 - [Amazon Bedrock](/bedrock)
 - [Z.AI](/providers/zai)
