@@ -1,3 +1,4 @@
+import type { OpenClawConfig } from "../config/config.js";
 import { buildXiaomiProvider, XIAOMI_DEFAULT_MODEL_ID } from "../agents/models-config.providers.js";
 import {
   buildSyntheticModelDefinition,
@@ -16,7 +17,6 @@ import {
   REDPILL_BASE_URL,
   REDPILL_DEFAULT_MODEL_REF,
 } from "../agents/redpill-models.js";
-import type { OpenClawConfig } from "../config/config.js";
 import {
   OPENROUTER_DEFAULT_MODEL_REF,
   VERCEL_AI_GATEWAY_DEFAULT_MODEL_REF,
