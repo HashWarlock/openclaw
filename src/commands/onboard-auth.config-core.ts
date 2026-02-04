@@ -146,6 +146,10 @@ export function applyMoonshotProviderConfig(cfg: OpenClawConfig): OpenClawConfig
   return applyMoonshotProviderConfigWithBaseUrl(cfg, MOONSHOT_BASE_URL);
 }
 
+export function applyMoonshotProviderConfigCn(cfg: OpenClawConfig): OpenClawConfig {
+  return applyMoonshotProviderConfigWithBaseUrl(cfg, MOONSHOT_CN_BASE_URL);
+}
+
 function applyMoonshotProviderConfigWithBaseUrl(
   cfg: OpenClawConfig,
   baseUrl: string,
@@ -215,7 +219,7 @@ export function applyMoonshotConfig(cfg: OpenClawConfig): OpenClawConfig {
 }
 
 export function applyMoonshotConfigCn(cfg: OpenClawConfig): OpenClawConfig {
-  const next = applyMoonshotProviderConfigWithBaseUrl(cfg, MOONSHOT_CN_BASE_URL);
+  const next = applyMoonshotProviderConfigCn(cfg);
   const existingModel = next.agents?.defaults?.model;
   return {
     ...next,
