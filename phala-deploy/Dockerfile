@@ -43,7 +43,15 @@ RUN NONINTERACTIVE=1 su - linuxbrew -c \
 ENV HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
 ENV PATH="${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:${PATH}"
 
-# Layer 5: Install build-essential, npm install openclaw, then purge build tools + cache
+# Layer 5: Install gogcli (Google Workspace CLI) via direct binary download
+# This is simpler and faster than building from source via Homebrew
+ARG GOGCLI_VERSION=0.9.0
+RUN ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') && \
+    curl -fsSL "https://github.com/steipete/gogcli/releases/download/v${GOGCLI_VERSION}/gogcli_${GOGCLI_VERSION}_linux_${ARCH}.tar.gz" | \
+    tar -xz -C /usr/local/bin gog && \
+    chmod +x /usr/local/bin/gog
+
+# Layer 6: Install build-essential, npm install openclaw, then purge build tools + cache
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential && \
     npm install -g @h4x3rotab/openclaw@latest && \
@@ -51,7 +59,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /root/.npm /tmp/* /usr/include
 
-# Layer 6: Install shared skills via clawhub
+# Layer 7: Install shared skills via clawhub
 # Skills are installed to /root/.openclaw/skills (global location)
 ENV OPENCLAW_STATE_DIR=/root/.openclaw
 RUN npx clawhub install gog && \
@@ -59,7 +67,7 @@ RUN npx clawhub install gog && \
     npx clawhub install attio-crm && \
     rm -rf /root/.npm /tmp/*
 
-# Layer 7: Shell environment
+# Layer 8: Shell environment
 RUN echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /root/.bashrc && \
     echo 'export PATH="/root/.bun/bin:$PATH"' >> /root/.bashrc
 
