@@ -1,4 +1,8 @@
 import type { OpenClawConfig } from "../config/config.js";
+import {
+  buildCloudflareAiGatewayModelDefinition,
+  resolveCloudflareAiGatewayBaseUrl,
+} from "../agents/cloudflare-ai-gateway.js";
 import { buildXiaomiProvider, XIAOMI_DEFAULT_MODEL_ID } from "../agents/models-config.providers.js";
 import {
   buildSyntheticModelDefinition,
@@ -18,6 +22,7 @@ import {
   REDPILL_DEFAULT_MODEL_REF,
 } from "../agents/redpill-models.js";
 import {
+  CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF,
   OPENROUTER_DEFAULT_MODEL_REF,
   VERCEL_AI_GATEWAY_DEFAULT_MODEL_REF,
   XIAOMI_DEFAULT_MODEL_REF,
@@ -50,8 +55,8 @@ export function applyZaiConfig(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: ZAI_DEFAULT_MODEL_REF,
         },
@@ -98,6 +103,73 @@ export function applyVercelAiGatewayProviderConfig(cfg: OpenClawConfig): OpenCla
   };
 }
 
+export function applyCloudflareAiGatewayProviderConfig(
+  cfg: OpenClawConfig,
+  params?: { accountId?: string; gatewayId?: string },
+): OpenClawConfig {
+  const models = { ...cfg.agents?.defaults?.models };
+  models[CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF] = {
+    ...models[CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF],
+    alias: models[CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF]?.alias ?? "Cloudflare AI Gateway",
+  };
+
+  const providers = { ...cfg.models?.providers };
+  const existingProvider = providers["cloudflare-ai-gateway"];
+  const existingModels = Array.isArray(existingProvider?.models) ? existingProvider.models : [];
+  const defaultModel = buildCloudflareAiGatewayModelDefinition();
+  const hasDefaultModel = existingModels.some((model) => model.id === defaultModel.id);
+  const mergedModels = hasDefaultModel ? existingModels : [...existingModels, defaultModel];
+  const baseUrl =
+    params?.accountId && params?.gatewayId
+      ? resolveCloudflareAiGatewayBaseUrl({
+        accountId: params.accountId,
+        gatewayId: params.gatewayId,
+      })
+      : existingProvider?.baseUrl;
+
+  if (!baseUrl) {
+    return {
+      ...cfg,
+      agents: {
+        ...cfg.agents,
+        defaults: {
+          ...cfg.agents?.defaults,
+          models,
+        },
+      },
+    };
+  }
+
+  const { apiKey: existingApiKey, ...existingProviderRest } = (existingProvider ?? {}) as Record<
+    string,
+    unknown
+  > as { apiKey?: string };
+  const resolvedApiKey = typeof existingApiKey === "string" ? existingApiKey : undefined;
+  const normalizedApiKey = resolvedApiKey?.trim();
+  providers["cloudflare-ai-gateway"] = {
+    ...existingProviderRest,
+    baseUrl,
+    api: "anthropic-messages",
+    ...(normalizedApiKey ? { apiKey: normalizedApiKey } : {}),
+    models: mergedModels.length > 0 ? mergedModels : [defaultModel],
+  };
+
+  return {
+    ...cfg,
+    agents: {
+      ...cfg.agents,
+      defaults: {
+        ...cfg.agents?.defaults,
+        models,
+      },
+    },
+    models: {
+      mode: cfg.models?.mode ?? "merge",
+      providers,
+    },
+  };
+}
+
 export function applyVercelAiGatewayConfig(cfg: OpenClawConfig): OpenClawConfig {
   const next = applyVercelAiGatewayProviderConfig(cfg);
   const existingModel = next.agents?.defaults?.model;
@@ -110,10 +182,35 @@ export function applyVercelAiGatewayConfig(cfg: OpenClawConfig): OpenClawConfig 
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: VERCEL_AI_GATEWAY_DEFAULT_MODEL_REF,
+        },
+      },
+    },
+  };
+}
+
+export function applyCloudflareAiGatewayConfig(
+  cfg: OpenClawConfig,
+  params?: { accountId?: string; gatewayId?: string },
+): OpenClawConfig {
+  const next = applyCloudflareAiGatewayProviderConfig(cfg, params);
+  const existingModel = next.agents?.defaults?.model;
+  return {
+    ...next,
+    agents: {
+      ...next.agents,
+      defaults: {
+        ...next.agents?.defaults,
+        model: {
+          ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
+            ? {
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
+            : undefined),
+          primary: CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF,
         },
       },
     },
@@ -132,8 +229,8 @@ export function applyOpenrouterConfig(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: OPENROUTER_DEFAULT_MODEL_REF,
         },
@@ -208,8 +305,8 @@ export function applyMoonshotConfig(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: MOONSHOT_DEFAULT_MODEL_REF,
         },
@@ -230,8 +327,8 @@ export function applyMoonshotConfigCn(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: MOONSHOT_DEFAULT_MODEL_REF,
         },
@@ -271,8 +368,8 @@ export function applyKimiCodeConfig(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: KIMI_CODING_MODEL_REF,
         },
@@ -340,8 +437,8 @@ export function applySyntheticConfig(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: SYNTHETIC_DEFAULT_MODEL_REF,
         },
@@ -411,8 +508,8 @@ export function applyXiaomiConfig(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: XIAOMI_DEFAULT_MODEL_REF,
         },
@@ -486,8 +583,8 @@ export function applyVeniceConfig(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: VENICE_DEFAULT_MODEL_REF,
         },
@@ -566,8 +663,8 @@ export function applyRedpillConfig(cfg: OpenClawConfig): OpenClawConfig {
         model: {
           ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
             ? {
-                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
-              }
+              fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+            }
             : undefined),
           primary: REDPILL_DEFAULT_MODEL_REF,
         },
@@ -602,18 +699,18 @@ export function applyAuthProfileConfig(
   const reorderedProviderOrder =
     existingProviderOrder && preferProfileFirst
       ? [
-          params.profileId,
-          ...existingProviderOrder.filter((profileId) => profileId !== params.profileId),
-        ]
+        params.profileId,
+        ...existingProviderOrder.filter((profileId) => profileId !== params.profileId),
+      ]
       : existingProviderOrder;
   const order =
     existingProviderOrder !== undefined
       ? {
-          ...cfg.auth?.order,
-          [params.provider]: reorderedProviderOrder?.includes(params.profileId)
-            ? reorderedProviderOrder
-            : [...(reorderedProviderOrder ?? []), params.profileId],
-        }
+        ...cfg.auth?.order,
+        [params.provider]: reorderedProviderOrder?.includes(params.profileId)
+          ? reorderedProviderOrder
+          : [...(reorderedProviderOrder ?? []), params.profileId],
+      }
       : cfg.auth?.order;
   return {
     ...cfg,
