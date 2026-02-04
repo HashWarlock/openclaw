@@ -137,6 +137,55 @@ Docker daemon ready.
 
 After that, your agent is live on Telegram and you can chat with it there.
 
+## Multi-agent setup
+
+This deployment runs a multi-agent system with an **orchestrator** that can onboard new users.
+
+### How it works
+
+1. **Orchestrator agent** — the default agent, handles onboarding and coordination
+2. **Worker agents** — one per user, created via Gmail OAuth
+3. **Shared skills** — all agents can use gog (Google), notion, and attio-crm
+
+### Onboarding new users
+
+**User-initiated:** User messages the orchestrator asking for an agent. Orchestrator guides them through Gmail OAuth, then creates their agent and sends them a dashboard URL.
+
+**Admin-initiated:** Admin tells orchestrator "onboard alice@company.com". Orchestrator sends an invite email, and creates the agent once Alice completes OAuth.
+
+### Dashboard URLs
+
+Each user gets a unique dashboard URL:
+
+```
+https://<app_id>-18789.<gateway>.phala.network?token=<USER_TOKEN>
+```
+
+- **Admin token** (from MASTER_KEY): Full access to orchestrator
+- **User tokens** (generated per-user): Access only to their agent
+
+### Required credentials
+
+For the skills to work, you need these in your `secrets/.env`:
+
+| Credential | Where to get it |
+|------------|-----------------|
+| `GOOGLE_CLIENT_ID` | Google Cloud Console → APIs & Services → Credentials |
+| `GOOGLE_CLIENT_SECRET` | Same as above |
+| `NOTION_API_KEY` | notion.so/my-integrations |
+| `ATTIO_API_KEY` | Attio dashboard → Settings → API |
+
+### Inter-agent communication
+
+Agents can message each other using `sessions_send`:
+- Workers can escalate to orchestrator
+- Workers can request info from each other
+- Orchestrator can broadcast to all workers
+
+### Human approval
+
+All agents follow "always ask" — they propose actions and wait for human approval before executing writes (send email, update Notion, etc.). Reads don't require approval.
+
 ## How S3 storage works
 
 The entrypoint tries two S3 sync strategies in order:
