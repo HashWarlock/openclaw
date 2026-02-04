@@ -79,6 +79,9 @@ RUN apt-get update && \
 COPY phala-deploy/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Copy orchestrator persona
+COPY phala-deploy/orchestrator/ /opt/openclaw/orchestrator/
+
 ENV NODE_ENV=production
 
 ENTRYPOINT ["/entrypoint.sh"]

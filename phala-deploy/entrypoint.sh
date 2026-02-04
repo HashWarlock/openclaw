@@ -215,6 +215,11 @@ CONF
 
   # Create orchestrator workspace directory
   mkdir -p "$STATE_DIR/workspaces/orchestrator"
+
+  # Copy orchestrator persona files
+  if [ -d /opt/openclaw/orchestrator ]; then
+    cp -r /opt/openclaw/orchestrator/* "$STATE_DIR/workspaces/orchestrator/" 2>/dev/null || true
+  fi
 fi
 
 # --- SQLite symlink helper ---
