@@ -120,11 +120,12 @@ else
   mkdir -p "$STATE_DIR"
 fi
 
-# Bootstrap config if none exists — generates full Redpill provider + model catalog
+# Bootstrap config if none exists — generates full Redpill provider + model catalog + orchestrator agent
 CONFIG_FILE="$STATE_DIR/openclaw.json"
 if [ ! -f "$CONFIG_FILE" ]; then
   BOOT_TOKEN="${GATEWAY_AUTH_TOKEN:-$(head -c 32 /dev/urandom | base64 | tr -d '/+=' | head -c 32)}"
   export CONFIG_FILE BOOT_TOKEN
+  export GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET NOTION_API_KEY ATTIO_API_KEY
   node -e "
     // Import Redpill config functions from installed openclaw package
     const PKG = '/usr/lib/node_modules/@h4x3rotab/openclaw/dist';
@@ -134,11 +135,29 @@ if [ ! -f "$CONFIG_FILE" ]; then
       gateway: {
         mode: 'local',
         bind: 'lan',
-        auth: { token: process.env.BOOT_TOKEN },
+        auth: {
+          token: process.env.BOOT_TOKEN,
+          userTokens: {}  // Will be populated as workers are onboarded
+        },
         controlUi: { dangerouslyDisableDeviceAuth: true },
       },
       update: { checkOnStart: false },
       agents: {
+        list: [
+          {
+            id: 'orchestrator',
+            name: 'Orchestrator',
+            default: true,
+            workspace: '/data/openclaw/workspaces/orchestrator',
+            identity: {
+              name: 'Company Hub',
+              personality: 'Helpful admin assistant that onboards users and coordinates work across the organization'
+            },
+            subagents: {
+              allowAgents: ['*']
+            }
+          }
+        ],
         defaults: {
           memorySearch: {
             provider: 'openai',
@@ -148,6 +167,29 @@ if [ ! -f "$CONFIG_FILE" ]; then
           },
         },
       },
+      skills: {
+        installed: {
+          'steipete/gog': {
+            enabled: true,
+            config: {
+              clientId: process.env.GOOGLE_CLIENT_ID || undefined,
+              clientSecret: process.env.GOOGLE_CLIENT_SECRET || undefined
+            }
+          },
+          'steipete/notion': {
+            enabled: true,
+            config: {
+              apiKey: process.env.NOTION_API_KEY || undefined
+            }
+          },
+          'kesslerio/attio-crm': {
+            enabled: true,
+            config: {
+              apiKey: process.env.ATTIO_API_KEY || undefined
+            }
+          }
+        }
+      }
     };
 
     // Apply full Redpill provider config (model catalog + default model)
@@ -166,10 +208,13 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # Fallback: write minimal config if node import fails (e.g. package structure changed)
     echo "Warning: full config generation failed, writing minimal config."
     cat > "$CONFIG_FILE" <<CONF
-{"gateway":{"mode":"local","bind":"lan","auth":{"token":"$BOOT_TOKEN"},"controlUi":{"dangerouslyDisableDeviceAuth":true}},"update":{"checkOnStart":false},"agents":{"defaults":{"memorySearch":{"provider":"openai","model":"qwen/qwen3-embedding-8b","remote":{"baseUrl":"https://api.redpill.ai/v1"},"fallback":"none"}}}}
+{"gateway":{"mode":"local","bind":"lan","auth":{"token":"$BOOT_TOKEN","userTokens":{}},"controlUi":{"dangerouslyDisableDeviceAuth":true}},"update":{"checkOnStart":false},"agents":{"list":[{"id":"orchestrator","name":"Orchestrator","default":true,"workspace":"/data/openclaw/workspaces/orchestrator","identity":{"name":"Company Hub","personality":"Helpful admin assistant"},"subagents":{"allowAgents":["*"]}}],"defaults":{"memorySearch":{"provider":"openai","model":"qwen/qwen3-embedding-8b","remote":{"baseUrl":"https://api.redpill.ai/v1"},"fallback":"none"}}}}
 CONF
   }
   echo "Created config at $CONFIG_FILE (token: ${GATEWAY_AUTH_TOKEN:+derived}${GATEWAY_AUTH_TOKEN:-random})"
+
+  # Create orchestrator workspace directory
+  mkdir -p "$STATE_DIR/workspaces/orchestrator"
 fi
 
 # --- SQLite symlink helper ---
