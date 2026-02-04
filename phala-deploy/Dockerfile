@@ -51,7 +51,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /root/.npm /tmp/* /usr/include
 
-# Layer 6: Shell environment
+# Layer 6: Install shared skills via clawhub
+# Skills are installed to /root/.openclaw/skills (global location)
+ENV OPENCLAW_STATE_DIR=/root/.openclaw
+RUN npx clawhub install steipete/gog && \
+    npx clawhub install steipete/notion && \
+    npx clawhub install kesslerio/attio-crm && \
+    rm -rf /root/.npm /tmp/*
+
+# Layer 7: Shell environment
 RUN echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /root/.bashrc && \
     echo 'export PATH="/root/.bun/bin:$PATH"' >> /root/.bashrc
 
