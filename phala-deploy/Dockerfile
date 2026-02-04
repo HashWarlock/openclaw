@@ -54,9 +54,9 @@ RUN apt-get update && \
 # Layer 6: Install shared skills via clawhub
 # Skills are installed to /root/.openclaw/skills (global location)
 ENV OPENCLAW_STATE_DIR=/root/.openclaw
-RUN npx clawhub install steipete/gog && \
-    npx clawhub install steipete/notion && \
-    npx clawhub install kesslerio/attio-crm && \
+RUN npx clawhub install gog && \
+    npx clawhub install notion && \
+    npx clawhub install attio-crm && \
     rm -rf /root/.npm /tmp/*
 
 # Layer 7: Shell environment

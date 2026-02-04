@@ -169,20 +169,20 @@ if [ ! -f "$CONFIG_FILE" ]; then
       },
       skills: {
         installed: {
-          'steipete/gog': {
+          'gog': {
             enabled: true,
             config: {
               clientId: process.env.GOOGLE_CLIENT_ID || undefined,
               clientSecret: process.env.GOOGLE_CLIENT_SECRET || undefined
             }
           },
-          'steipete/notion': {
+          'notion': {
             enabled: true,
             config: {
               apiKey: process.env.NOTION_API_KEY || undefined
             }
           },
-          'kesslerio/attio-crm': {
+          'attio-crm': {
             enabled: true,
             config: {
               apiKey: process.env.ATTIO_API_KEY || undefined
