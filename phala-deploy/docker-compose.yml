@@ -32,6 +32,11 @@ services:
       # Override derived crypt passwords (optional — only if not using MASTER_KEY)
       RCLONE_CRYPT_PASSWORD: ${RCLONE_CRYPT_PASSWORD:-}
       RCLONE_CRYPT_PASSWORD2: ${RCLONE_CRYPT_PASSWORD2:-}
+      # Skills credentials
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      NOTION_API_KEY: ${NOTION_API_KEY:-}
+      ATTIO_API_KEY: ${ATTIO_API_KEY:-}
     restart: unless-stopped
 
 volumes:
