@@ -136,8 +136,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
         mode: 'local',
         bind: 'lan',
         auth: {
-          token: process.env.BOOT_TOKEN,
-          userTokens: {}  // Will be populated as workers are onboarded
+          token: process.env.BOOT_TOKEN
         },
         controlUi: { dangerouslyDisableDeviceAuth: true },
       },
@@ -150,8 +149,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
             default: true,
             workspace: '/data/openclaw/workspaces/orchestrator',
             identity: {
-              name: 'Company Hub',
-              personality: 'Helpful admin assistant that onboards users and coordinates work across the organization'
+              name: 'Company Hub'
             },
             subagents: {
               allowAgents: ['*']
@@ -168,7 +166,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
         },
       },
       skills: {
-        installed: {
+        entries: {
           'gog': {
             enabled: true,
             config: {
@@ -208,7 +206,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # Fallback: write minimal config if node import fails (e.g. package structure changed)
     echo "Warning: full config generation failed, writing minimal config."
     cat > "$CONFIG_FILE" <<CONF
-{"gateway":{"mode":"local","bind":"lan","auth":{"token":"$BOOT_TOKEN","userTokens":{}},"controlUi":{"dangerouslyDisableDeviceAuth":true}},"update":{"checkOnStart":false},"agents":{"list":[{"id":"orchestrator","name":"Orchestrator","default":true,"workspace":"/data/openclaw/workspaces/orchestrator","identity":{"name":"Company Hub","personality":"Helpful admin assistant"},"subagents":{"allowAgents":["*"]}}],"defaults":{"memorySearch":{"provider":"openai","model":"qwen/qwen3-embedding-8b","remote":{"baseUrl":"https://api.redpill.ai/v1"},"fallback":"none"}}}}
+{"gateway":{"mode":"local","bind":"lan","auth":{"token":"$BOOT_TOKEN"},"controlUi":{"dangerouslyDisableDeviceAuth":true}},"update":{"checkOnStart":false},"agents":{"list":[{"id":"orchestrator","name":"Orchestrator","default":true,"workspace":"/data/openclaw/workspaces/orchestrator","identity":{"name":"Company Hub"},"subagents":{"allowAgents":["*"]}}],"defaults":{"memorySearch":{"provider":"openai","model":"qwen/qwen3-embedding-8b","remote":{"baseUrl":"https://api.redpill.ai/v1"},"fallback":"none"}}}}
 CONF
   }
   echo "Created config at $CONFIG_FILE (token: ${GATEWAY_AUTH_TOKEN:+derived}${GATEWAY_AUTH_TOKEN:-random})"

@@ -1,6 +1,6 @@
 services:
   openclaw:
-    image: h4x3rotab/openclaw-cvm@sha256:67859b37e2ab7c1b2d3980597e05a6e19518e412ab64d9fe7920971080e5f146
+    image: hashwarlock/openclaw-mas-cvm@sha256:9908a79f8242b7b41bb7a8b7c3593f06b0d97cd972604c850ac867e19878be49
     # For local builds, uncomment below and comment out image:
     # build:
     #   context: ..
@@ -14,6 +14,7 @@ services:
       - /home/root/.ssh:/root/.ssh:ro
       - openclaw_state:/data/openclaw
       - docker_data:/var/lib/docker
+      - /var/run/dstack.sock:/var/run/dstack.sock
     environment:
       OPENCLAW_STATE_DIR: /data/openclaw
       NODE_ENV: production
