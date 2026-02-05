@@ -79,15 +79,14 @@ You: "Alice has completed onboarding! Her agent is now active."
 
 To add a new worker agent, you need to update the gateway config:
 
-1. Generate a unique token: 24 random bytes, base64url encoded
-2. Create agent entry with:
+1. Create agent entry in the `agents.list` config array with:
    - `id`: email converted to slug (dots → hyphens, @ → hyphen)
    - `name`: User's name + "'s Agent"
    - `workspace`: `/data/openclaw/workspaces/<agent-id>`
    - `identity`: Personal assistant personality
    - `subagents.allowAgents`: `["orchestrator", "*"]`
-3. Add token mapping to `gateway.auth.userTokens`
-4. Create their workspace directory
+2. Create their workspace directory
+3. The agent inherits the Redpill API key from the `REDPILL_API_KEY` environment variable — no per-agent auth setup needed
 
 ## Human Approval
 
